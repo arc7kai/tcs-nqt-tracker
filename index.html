@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCS NQT Master Practice Tracker</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --text-color: #2c3e50;
+            --primary-color: #2980b9;
+            --secondary-color: #ecf0f1;
+            --ninja-color: #27ae60;
+            --digital-color: #c0392b;
+            --row-hover: #e8f4f8;
+            --solved-bg: #d4edda;
+            --solved-text: #6c757d;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { color: var(--primary-color); }
+        .progress-container {
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid #ddd; }
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            position: sticky;
+            top: 0;
+            text-transform: uppercase;
+            font-size: 13px;
+        }
+        tr { transition: background-color 0.2s ease; }
+        tr:hover { background-color: var(--row-hover); }
+        
+        /* Checkbox & Solved State Styles */
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .solved td {
+            background-color: var(--solved-bg);
+            color: var(--solved-text);
+            text-decoration: line-through;
+        }
+        .solved td a { color: var(--solved-text); }
+        .solved .level-badge { opacity: 0.6; }
+
+        .level-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+        }
+        .level-ninja { background-color: var(--ninja-color); }
+        .level-digital { background-color: var(--digital-color); }
+        
+        a.platform-link {
+            font-family: monospace;
+            background: #f1f2f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #d63384;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        a.platform-link:hover { background: #d63384; color: white; }
+    </style>
+</head>
+<body>
+
+    <h1>TCS NQT Master Practice Tracker</h1>
+    <div class="progress-container">
+        Progress: <span id="progress-text">0</span> / <span id="total-text">0</span> Solved
+    </div>
+
+    <div class="container">
+        <table id="tracker-table">
+            <thead>
+                <tr>
+                    <th>Done</th>
+                    <th>Category</th>
+                    <th>Topic</th>
+                    <th>Level</th>
+                    <th>Practice Link</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Data Model containing the exhaustive list and direct links
+        const questionsData = [
+            // ARRAYS
+            { cat: "Arrays", topic: "Smallest / Largest Element", level: "Ninja", linkText: "GFG Min/Max", url: "https://practice.geeksforgeeks.org/problems/find-minimum-and-maximum-element-in-an-array4428/1" },
+            { cat: "Arrays", topic: "Reverse Array", level: "Ninja", linkText: "LeetCode 344", url: "https://leetcode.com/problems/reverse-string/" },
+            { cat: "Arrays", topic: "Frequency Count / Sort by Freq", level: "Ninja", linkText: "LeetCode 1636", url: "https://leetcode.com/problems/sort-array-by-increasing-frequency/" },
+            { cat: "Arrays", topic: "Rotate Array by K", level: "Ninja", linkText: "LeetCode 189", url: "https://leetcode.com/problems/rotate-array/" },
+            { cat: "Arrays", topic: "Remove Duplicates (Sorted)", level: "Ninja", linkText: "LeetCode 26", url: "https://leetcode.com/problems/remove-duplicates-from-sorted-array/" },
+            { cat: "Arrays", topic: "Repeating / Non-Repeating", level: "Ninja", linkText: "LeetCode 136", url: "https://leetcode.com/problems/single-number/" },
+            { cat: "Arrays", topic: "Max Product Subarray", level: "Ninja", linkText: "LeetCode 152", url: "https://leetcode.com/problems/maximum-product-subarray/" },
+            { cat: "Arrays", topic: "Replace Elements by Rank", level: "Ninja", linkText: "LeetCode 1331", url: "https://leetcode.com/problems/rank-transform-of-an-array/" },
+            { cat: "Arrays", topic: "Equilibrium Index (Pivot)", level: "Ninja", linkText: "LeetCode 724", url: "https://leetcode.com/problems/find-pivot-index/" },
+            { cat: "Arrays", topic: "Subset Check", level: "Ninja", linkText: "LeetCode 78", url: "https://leetcode.com/problems/subsets/" },
+            { cat: "Arrays", topic: "Kadane's Algo (Max Subarray)", level: "Digital", linkText: "LeetCode 53", url: "https://leetcode.com/problems/maximum-subarray/" },
+            { cat: "Arrays", topic: "Stock Buy and Sell", level: "Digital", linkText: "LeetCode 121", url: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" },
+            { cat: "Arrays", topic: "Trapping Rain Water", level: "Digital", linkText: "LeetCode 42", url: "https://leetcode.com/problems/trapping-rain-water/" },
+            { cat: "Arrays", topic: "Find Missing Number", level: "Digital", linkText: "LeetCode 268", url: "https://leetcode.com/problems/missing-number/" },
+            { cat: "Arrays", topic: "Dutch National Flag (0s, 1s, 2s)", level: "Digital", linkText: "LeetCode 75", url: "https://leetcode.com/problems/sort-colors/" },
+
+            // NUMBERS & MATH
+            { cat: "Math", topic: "Palindrome Number", level: "Ninja", linkText: "LeetCode 9", url: "https://leetcode.com/problems/palindrome-number/" },
+            { cat: "Math", topic: "Prime Check / Count Primes", level: "Ninja", linkText: "LeetCode 204", url: "https://leetcode.com/problems/count-primes/" },
+            { cat: "Math", topic: "Armstrong / Perfect Numbers", level: "Ninja", linkText: "LeetCode 507", url: "https://leetcode.com/problems/perfect-number/" },
+            { cat: "Math", topic: "Reverse Digits", level: "Ninja", linkText: "LeetCode 7", url: "https://leetcode.com/problems/reverse-integer/" },
+            { cat: "Math", topic: "Fibonacci Number", level: "Ninja", linkText: "LeetCode 509", url: "https://leetcode.com/problems/fibonacci-number/" },
+            { cat: "Math", topic: "Power (x, n)", level: "Ninja", linkText: "LeetCode 50", url: "https://leetcode.com/problems/powx-n/" },
+            { cat: "Math", topic: "Sum of Digits", level: "Ninja", linkText: "LeetCode 258", url: "https://leetcode.com/problems/add-digits/" },
+            { cat: "Math", topic: "Permutations", level: "Ninja", linkText: "LeetCode 46", url: "https://leetcode.com/problems/permutations/" },
+            { cat: "Math", topic: "Fraction Addition", level: "Ninja", linkText: "LeetCode 592", url: "https://leetcode.com/problems/fraction-addition-and-subtraction/" },
+            { cat: "Math", topic: "Date / Day Logic", level: "Digital", linkText: "LeetCode 1185", url: "https://leetcode.com/problems/day-of-the-week/" },
+            { cat: "Math", topic: "Jump Game (Min Steps)", level: "Digital", linkText: "LeetCode 55", url: "https://leetcode.com/problems/jump-game/" },
+
+            // NUMBER SYSTEM & BITWISE
+            { cat: "Bitwise", topic: "Reverse Bits (Binary Conv.)", level: "Ninja", linkText: "LeetCode 190", url: "https://leetcode.com/problems/reverse-bits/" },
+            { cat: "Bitwise", topic: "Integer to English Words", level: "Ninja", linkText: "LeetCode 273", url: "https://leetcode.com/problems/integer-to-english-words/" },
+            { cat: "Bitwise", topic: "Count Set Bits", level: "Digital", linkText: "LeetCode 191", url: "https://leetcode.com/problems/number-of-1-bits/" },
+            { cat: "Bitwise", topic: "Power of Two", level: "Digital", linkText: "LeetCode 231", url: "https://leetcode.com/problems/power-of-two/" },
+
+            // SORTING & SEARCHING
+            { cat: "Search/Sort", topic: "Binary Search", level: "Digital", linkText: "LeetCode 704", url: "https://leetcode.com/problems/binary-search/" },
+
+            // STRINGS
+            { cat: "Strings", topic: "Valid Palindrome", level: "Ninja", linkText: "LeetCode 125", url: "https://leetcode.com/problems/valid-palindrome/" },
+            { cat: "Strings", topic: "Reverse Words in a String", level: "Ninja", linkText: "LeetCode 151", url: "https://leetcode.com/problems/reverse-words-in-a-string/" },
+            { cat: "Strings", topic: "Remove Vowels", level: "Ninja", linkText: "LeetCode 1119", url: "https://leetcode.com/problems/remove-vowels-from-a-string/" },
+            { cat: "Strings", topic: "Capitalize the Title", level: "Ninja", linkText: "LeetCode 2129", url: "https://leetcode.com/problems/capitalize-the-title/" },
+            { cat: "Strings", topic: "Valid Anagram", level: "Ninja", linkText: "LeetCode 242", url: "https://leetcode.com/problems/valid-anagram/" },
+            { cat: "Strings", topic: "Wildcard Matching", level: "Ninja", linkText: "LeetCode 44", url: "https://leetcode.com/problems/wildcard-matching/" },
+            { cat: "Strings", topic: "Next Permutation (Lexicographic)", level: "Ninja", linkText: "LeetCode 31", url: "https://leetcode.com/problems/next-permutation/" },
+            { cat: "Strings", topic: "Longest Substring W/O Repeating", level: "Digital", linkText: "LeetCode 3", url: "https://leetcode.com/problems/longest-substring-without-repeating-characters/" },
+            { cat: "Strings", topic: "Backspace String Compare", level: "Digital", linkText: "LeetCode 844", url: "https://leetcode.com/problems/backspace-string-compare/" },
+
+            // MATRICES
+            { cat: "Matrices", topic: "Rotate Matrix 90 Degrees", level: "Digital", linkText: "LeetCode 48", url: "https://leetcode.com/problems/rotate-image/" },
+            { cat: "Matrices", topic: "Spiral Matrix", level: "Digital", linkText: "LeetCode 54", url: "https://leetcode.com/problems/spiral-matrix/" },
+            { cat: "Matrices", topic: "Set Matrix Zeros", level: "Digital", linkText: "LeetCode 73", url: "https://leetcode.com/problems/set-matrix-zeroes/" },
+            { cat: "Matrices", topic: "Search a 2D Matrix", level: "Digital", linkText: "LeetCode 74", url: "https://leetcode.com/problems/search-a-2d-matrix/" },
+
+            // ADVANCED DSA
+            { cat: "Adv. DSA", topic: "Valid Parentheses (Stack)", level: "Digital", linkText: "LeetCode 20", url: "https://leetcode.com/problems/valid-parentheses/" },
+            { cat: "Adv. DSA", topic: "Longest Common Subsequence", level: "Digital", linkText: "LeetCode 1143", url: "https://leetcode.com/problems/longest-common-subsequence/" },
+            { cat: "Adv. DSA", topic: "Longest Increasing Subsequence", level: "Digital", linkText: "LeetCode 300", url: "https://leetcode.com/problems/longest-increasing-subsequence/" }
+        ];
+
+        const tbody = document.getElementById('table-body');
+        const progressText = document.getElementById('progress-text');
+        const totalText = document.getElementById('total-text');
+        let solvedCount = 0;
+
+        // Initialize total count
+        totalText.innerText = questionsData.length;
+
+        // Render Table Loop
+        questionsData.forEach((q, index) => {
+            const tr = document.createElement('tr');
+            
+            // Generate CSS classes based on level
+            const levelClass = q.level === "Ninja" ? "level-ninja" : "level-digital";
+
+            tr.innerHTML = `
+                <td><input type="checkbox" data-index="${index}" class="solve-checkbox"></td>
+                <td>${q.cat}</td>
+                <td>${q.topic}</td>
+                <td><span class="level-badge ${levelClass}">${q.level}</span></td>
+                <td><a href="${q.url}" target="_blank" class="platform-link">${q.linkText}</a></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Event Delegation for Checkboxes
+        tbody.addEventListener('change', function(e) {
+            if (e.target && e.target.classList.contains('solve-checkbox')) {
+                const row = e.target.closest('tr');
+                if (e.target.checked) {
+                    row.classList.add('solved');
+                    solvedCount++;
+                } else {
+                    row.classList.remove('solved');
+                    solvedCount--;
+                }
+                progressText.innerText = solvedCount;
+            }
+        });
+    </script>
+</body>
+</html>
